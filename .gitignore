@@ -137,3 +137,12 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+#Python
+.venv/
+
+#Prisma
+prisma/generated/prisma
+
+# Ignore generated Prisma client
+prisma/client/

@@ -1,0 +1,27 @@
+{
+  "devDependencies": {
+    "prisma": "^6.11.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.11.0"
+  },
+  "name": "fantasy-calendar",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexanderFeijoo/fantasy-calendar.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AlexanderFeijoo/fantasy-calendar/issues"
+  },
+  "homepage": "https://github.com/AlexanderFeijoo/fantasy-calendar#readme"
+}
