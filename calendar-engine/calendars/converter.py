@@ -1,9 +1,34 @@
+from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Iterator, Tuple, Union
-from dateutil.parser import parse as date_parser
+import re
 from calendars.schema import CalendarSchema
 from calendars.types import CustomCalendarDate
 from calendars import CALENDAR_MAP
+
+
+@dataclass
+class ProlepticDate:
+    year: int
+    month: int
+    day: int
+
+
+DATE_RE = re.compile(r"^(?P<year>-?\d+)-(?P<month>\d{2})-(?P<day>\d{2})$")
+
+
+def parse_gregorian(date_str: str) -> ProlepticDate:
+    match = DATE_RE.match(date_str)
+    if not match:
+        raise ValueError("Invalid date format. Use YYYY-MM-DD")
+    year = int(match.group("year"))
+    month = int(match.group("month"))
+    day = int(match.group("day"))
+    if not 1 <= month <= 12:
+        raise ValueError("Month must be in 1..12")
+    if day < 1 or day > 31:
+        raise ValueError("Day out of range")
+    return ProlepticDate(year, month, day)
 
 
 def _is_leap(year: int, schema: CalendarSchema) -> bool:
@@ -46,28 +71,63 @@ def is_gregorian_leap(year: int) -> bool:
     return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
 
 
-def days_between_gregorian(start: date, end: date) -> int:
-    """Calculates day difference between two dates, manually supporting BCE years."""
-    reverse = False
-    if start > end:
-        start, end = end, start
-        reverse = True
+def days_before_year(year: int) -> int:
+    y = year - 1
+    return y * 365 + y // 4 - y // 100 + y // 400
 
-    total_days = 0
-    for year in range(start.year, end.year):
-        total_days += 366 if is_gregorian_leap(year) else 365
 
-    total_days += (end - date(end.year, 1, 1)).days
-    total_days -= (start - date(start.year, 1, 1)).days
+DAYS_BEFORE_MONTH = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365]
+DAYS_BEFORE_MONTH_LEAP = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366]
 
-    return -total_days if reverse else total_days
+
+def _to_ordinal(pdate: ProlepticDate) -> int:
+    days = days_before_year(pdate.year)
+    days_before_month = DAYS_BEFORE_MONTH_LEAP if is_gregorian_leap(pdate.year) else DAYS_BEFORE_MONTH
+    days += days_before_month[pdate.month - 1]
+    days += pdate.day
+    return days
+
+
+def days_between_gregorian(start: ProlepticDate, end: ProlepticDate) -> int:
+    """Calculates day difference between two Gregorian dates (supports BCE)."""
+    start_ord = _to_ordinal(start)
+    end_ord = _to_ordinal(end)
+    return end_ord - start_ord
+
+
+def _from_ordinal(n: int) -> date:
+    """Convert ordinal day count (1-based) to datetime.date. Supports year>=1."""
+    y = (10000 * n + 14780) // 3652425
+    while True:
+        year_ordinal_start = days_before_year(y + 1) + 1
+        if n < year_ordinal_start:
+            break
+        y += 1
+
+    day_of_year = n - days_before_year(y)
+    leap = is_gregorian_leap(y)
+    days_before = DAYS_BEFORE_MONTH_LEAP if leap else DAYS_BEFORE_MONTH
+    month = 1
+    while month <= 12 and day_of_year > days_before[month]:
+        month += 1
+    day = day_of_year - days_before[month - 1]
+
+    if y <= 0:
+        raise ValueError("Gregorian dates before year 1 are not supported")
+    return date(y, month, day)
 
 
 def gregorian_to_calendar(g_date: Union[str, date], schema: CalendarSchema) -> CustomCalendarDate:
     if isinstance(g_date, str):
-        g_date = date_parser(g_date).date()
+        parsed = parse_gregorian(g_date)
+    elif isinstance(g_date, date):
+        parsed = ProlepticDate(g_date.year, g_date.month, g_date.day)
+    else:
+        raise TypeError("g_date must be a str or date")
 
-    days = days_between_gregorian(schema.epoch_date, g_date)
+    epoch_pd = ProlepticDate(schema.epoch_date.year, schema.epoch_date.month, schema.epoch_date.day)
+
+    days = days_between_gregorian(epoch_pd, parsed)
     year = schema.epoch_year
 
     if days >= 0:
@@ -94,7 +154,10 @@ def calendar_to_gregorian(cc_date: CustomCalendarDate, schema: CalendarSchema) -
 
     day_index = _custom_to_day_index(cc_date, schema)
     days += day_index
-    return schema.epoch_date + timedelta(days=days)
+
+    epoch_pd = ProlepticDate(schema.epoch_date.year, schema.epoch_date.month, schema.epoch_date.day)
+    target_ord = _to_ordinal(epoch_pd) + days
+    return _from_ordinal(target_ord)
 
 
 def convert_date(input_obj: Union[str, date, CustomCalendarDate], calendar: str = "harptos") -> Union[CustomCalendarDate, date]:
