@@ -1,19 +1,21 @@
-# calendars/harptos.py
-
 from datetime import date
 from .schema import CalendarSchema, Month, IntercalaryDay
 
 
-def harptos_leap_year(year: int) -> bool:
-    """Return True if the given Harptos year is a leap year."""
-    # Align leap years with the Gregorian cycle so that year 2 (1132) is leap
-    return (year + 1130) % 4 == 0
+def make_harptos_leap_year(epoch_year: int, epoch_date: date):
+    def harptos_leap_year(year: int) -> bool:
+        gregorian_year = epoch_date.year + (year - epoch_year)
+        return gregorian_year % 4 == 0 and (gregorian_year % 100 != 0 or gregorian_year % 400 == 0)
+    return harptos_leap_year
 
+
+EPOCH_DATE = date(1130, 1, 1)
+EPOCH_YEAR = 0
 
 HarptosCalendar = CalendarSchema(
     name="harptos",
-    epoch_date=date(1130, 1, 1),  # 1 Hammer, Year 0
-    epoch_year=0,
+    epoch_date=EPOCH_DATE,
+    epoch_year=EPOCH_YEAR,
     months=[
         Month("Hammer", 30),
         Month("Alturiak", 30),
@@ -29,13 +31,13 @@ HarptosCalendar = CalendarSchema(
         Month("Nightal", 30),
     ],
     intercalary_days=[
-        IntercalaryDay("Midwinter", "Hammer", 31),
-        IntercalaryDay("Greengrass", "Tarsakh", 31),
-        IntercalaryDay("Midsummer", "Flamerule", 31),
-        IntercalaryDay("Shieldmeet", "Midsummer", 32, leap_year_only=True),
-        IntercalaryDay("Highharvestide", "Eleint", 31),
-        IntercalaryDay("Feast of the Moon", "Uktar", 31),
+        IntercalaryDay("Midwinter", "Hammer"),
+        IntercalaryDay("Greengrass", "Tarsakh"),
+        IntercalaryDay("Midsummer", "Flamerule"),
+        IntercalaryDay("Shieldmeet", "Midsummer", leap_year_only=True),
+        IntercalaryDay("Highharvestide", "Eleint"),
+        IntercalaryDay("Feast of the Moon", "Uktar"),
     ],
-    is_leap_year=harptos_leap_year,
+    is_leap_year=make_harptos_leap_year(EPOCH_YEAR, EPOCH_DATE),
     has_fixed_year_length=True
 )

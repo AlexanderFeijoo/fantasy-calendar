@@ -1,9 +1,9 @@
 from datetime import date, timedelta
 from typing import Iterator, Tuple, Union
-
-from . import CALENDAR_MAP
-from .schema import CalendarSchema
-from .types import CustomCalendarDate
+from dateutil.parser import parse as date_parser
+from calendars.schema import CalendarSchema
+from calendars.types import CustomCalendarDate
+from calendars import CALENDAR_MAP
 
 
 def _is_leap(year: int, schema: CalendarSchema) -> bool:
@@ -39,11 +39,35 @@ def _custom_to_day_index(cc_date: CustomCalendarDate, schema: CalendarSchema) ->
     for idx, (name, day) in enumerate(_year_iter(cc_date.year, schema)):
         if name == cc_date.month and day == cc_date.day:
             return idx
-    raise ValueError("Unknown month")
+    raise ValueError("Unknown calendar date")
 
 
-def gregorian_to_calendar(g_date: date, schema: CalendarSchema) -> CustomCalendarDate:
-    days = (g_date - schema.epoch_date).days
+def is_gregorian_leap(year: int) -> bool:
+    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
+
+
+def days_between_gregorian(start: date, end: date) -> int:
+    """Calculates day difference between two dates, manually supporting BCE years."""
+    reverse = False
+    if start > end:
+        start, end = end, start
+        reverse = True
+
+    total_days = 0
+    for year in range(start.year, end.year):
+        total_days += 366 if is_gregorian_leap(year) else 365
+
+    total_days += (end - date(end.year, 1, 1)).days
+    total_days -= (start - date(start.year, 1, 1)).days
+
+    return -total_days if reverse else total_days
+
+
+def gregorian_to_calendar(g_date: Union[str, date], schema: CalendarSchema) -> CustomCalendarDate:
+    if isinstance(g_date, str):
+        g_date = date_parser(g_date).date()
+
+    days = days_between_gregorian(schema.epoch_date, g_date)
     year = schema.epoch_year
 
     if days >= 0:
@@ -73,14 +97,14 @@ def calendar_to_gregorian(cc_date: CustomCalendarDate, schema: CalendarSchema) -
     return schema.epoch_date + timedelta(days=days)
 
 
-def convert_date(input_obj: Union[date, CustomCalendarDate], calendar: str = "harptos") -> Union[CustomCalendarDate, date]:
+def convert_date(input_obj: Union[str, date, CustomCalendarDate], calendar: str = "harptos") -> Union[CustomCalendarDate, date]:
     schema = CALENDAR_MAP.get(calendar.lower())
     if not schema:
         raise ValueError(f"Unknown calendar '{calendar}'")
 
-    if isinstance(input_obj, date):
+    if isinstance(input_obj, (str, date)):
         return gregorian_to_calendar(input_obj, schema)
     elif isinstance(input_obj, CustomCalendarDate):
         return calendar_to_gregorian(input_obj, schema)
     else:
-        raise TypeError("input_obj must be a datetime.date or CustomCalendarDate")
+        raise TypeError("input_obj must be a str, datetime.date, or CustomCalendarDate")

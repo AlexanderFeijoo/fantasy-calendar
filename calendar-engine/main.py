@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from datetime import datetime
+from dateutil.parser import parse as date_parser
 
 from calendars.converter import convert_date
 from calendars.types import CustomCalendarDate
@@ -25,10 +25,10 @@ def read_root():
 def convert_date_endpoint(req: ConvertDateRequest):
     if req.gregorian:
         try:
-            parsed_date = datetime.strptime(req.gregorian, "%Y-%m-%d").date()
+            parsed_date = date_parser(req.gregorian).date()
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
-        result = convert_date(parsed_date, req.calendar)
+        result = convert_date(req.gregorian, req.calendar)
         return {"calendar_date": result.__dict__}
 
     if None not in (req.year, req.month, req.day):

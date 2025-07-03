@@ -15,6 +15,16 @@ services:
     build: ./calendar-engine
     ports:
       - "5001:5000"
+    volumes:
+      - ./calendar-engine:/app
+
+  test:
+    build: ./calendar-engine
+    command: ["pytest", "tests/"]
+    volumes:
+      - ./calendar-engine:/app
+    depends_on:
+      - db
 
 volumes:
   pgdata:
