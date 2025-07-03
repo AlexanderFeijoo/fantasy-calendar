@@ -5,7 +5,9 @@ from .schema import CalendarSchema, Month, IntercalaryDay
 
 
 def harptos_leap_year(year: int) -> bool:
-    return year % 4 == 0
+    """Return True if the given Harptos year is a leap year."""
+    # Align leap years with the Gregorian cycle so that year 2 (1132) is leap
+    return (year + 1130) % 4 == 0
 
 
 HarptosCalendar = CalendarSchema(
