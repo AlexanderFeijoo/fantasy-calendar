@@ -9,6 +9,10 @@ class ConvertDateRequest(BaseModel):
     date: str
     calendar: str = "harptos"
 
+@app.get("/")
+def read_root():
+    return {"status": "ok"}
+
 @app.post("/convert-date")
 def convert_date_endpoint(req: ConvertDateRequest):
     try:
