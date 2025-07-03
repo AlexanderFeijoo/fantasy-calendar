@@ -54,6 +54,9 @@ def test_intercalary_boundaries():
     assert after.month == "Mirtul"
     assert after.day == 1
 
+def test_bce_gregorian_to_harptos():
+    result = convert_date("-0200-01-01")
+    assert result == CustomCalendarDate(year=-1330, month="Hammer", day=1)
 
 
 
