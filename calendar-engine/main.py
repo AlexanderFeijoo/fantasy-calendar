@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from enum import Enum
-from dateutil.parser import parse as date_parser
 
 from calendars.converter import convert_date
 from calendars.types import CustomCalendarDate
@@ -10,6 +10,17 @@ class CalendarName(str, Enum):
     harptos = "harptos"
 
 app = FastAPI()
+
+# Allow local frontend during development
+origins = ["http://localhost:3000"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class ConvertDateRequest(BaseModel):
     gregorian: str | None = None
@@ -27,7 +38,7 @@ def read_root():
 def convert_date_endpoint(req: ConvertDateRequest):
     if req.gregorian:
         try:
-         result = convert_date(req.gregorian, req.calendar)
+            result = convert_date(req.gregorian, req.calendar)
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
         return {"calendar_date": result.__dict__}
