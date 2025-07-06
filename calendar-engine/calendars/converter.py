@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date
 from typing import Iterator, Tuple, Union
 import re
 from calendars.schema import CalendarSchema
