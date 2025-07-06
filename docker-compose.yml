@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   db:
     image: postgres:14
@@ -17,6 +18,18 @@ services:
       - "5001:5000"
     volumes:
       - ./calendar-engine:/app
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # Prevent host node_modules from overwriting
+    working_dir: /app
+    command: npm run dev
 
   test:
     build: ./calendar-engine
