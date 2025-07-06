@@ -1,10 +1,10 @@
-# 🗓️ Fantasy Calendar
+# Fantasy Calendar
 
 A full-stack calendar web app for tracking and managing custom fantasy-world calendars, inspired by **Dungeons & Dragons' Calendar of Harptos**. This project includes a Dockerized FastAPI backend engine and a Prisma/PostgreSQL schema designed to eventually power a rich Next.js frontend UI.
 
 ---
 
-## 🚀 Features (Working Today)
+## Features (Working Today)
 
 - Bi-directional date conversion between **Gregorian** and **custom calendars** like Harptos
 - Full Docker-based local development setup with FastAPI + PostgreSQL
@@ -16,42 +16,53 @@ A full-stack calendar web app for tracking and managing custom fantasy-world cal
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 fantasy-calendar/
-├── docker-compose.yml
-├── .env                      # Environment variables (Postgres, ports)
-├── README.md                 # You're here!
+├── docker-compose.yml         # Orchestrates services (FastAPI, Postgres, future frontend)
+├── .env                       # Environment config for Postgres, ports, etc.
+├── README.md                  # This file
 │
-├── prisma/                   # Prisma ORM models (stub for now)
-│   ├── schema.prisma
-│   └── client/
-├── frontend/                 # stub for now
-├── calendar-engine/          # FastAPI Python microservice
-│   ├── main.py               # API endpoints
-│   ├── converter.py          # Core calendar conversion logic
-│   ├── requirements.txt
-│   ├── Dockerfile
-│   ├── tests/                # Pytest unit tests
-│   │   └── test_converter.py
-│   └── calendars/
-│       ├── schema.py         # CalendarSchema, Month, IntercalaryDay
-│       ├── types.py          # CustomCalendarDate type
-│       └── harptos.py        # Calendar of Harptos config
+├── prisma/                    # Prisma ORM setup for Postgres
+│   ├── schema.prisma          # Models: Event, Calendar, Character, etc.
+│   └── client/                # Generated Prisma client (checked into Git for now)
+│
+├── frontend/                  # (WIP) Next.js frontend
+│   ├── pages/                 # Dynamic calendar views (future)
+│   ├── components/            # UI building blocks (Tailwind + Radix planned)
+│   └── ...
+│
+├── calendar-engine/           # Python FastAPI microservice for calendar conversions
+│   ├── main.py                # `/convert-date` endpoint (FastAPI)
+│   ├── converter.py           # Core conversion logic (Gregorian <-> fantasy)
+│   ├── requirements.txt       # Python deps (installed locally for linting)
+│   ├── Dockerfile             # Container for the service
+│   │
+│   ├── calendars/
+│   │   ├── schema.py          # `CalendarSchema`, `Month`, `IntercalaryDay` classes
+│   │   ├── types.py           # `CustomCalendarDate` struct (used in API and logic)
+│   │   ├── harptos.py         # Harptos calendar schema definition
+│   │   └── __init__.py
+│   │
+│   ├── tests/
+│   │   └── test_converter.py  # Unit tests for conversion logic (Pytest)
+│   └── ...
+│
+└── scripts/                   # (Optional) CLI utilities, seed data scripts
 ```
 
 ---
 
-## 🐳 Running Locally with Docker
+## Running Locally with Docker
 
-### ✅ Prerequisites
+### Prerequisites
 
 - Docker + Docker Compose
 - Python (optional, for local linting/testing)
 - Node.js (optional, frontend WIP)
 
-### 🔧 Setup Steps
+### Setup Steps
 
 ```bash
 git clone https://github.com/AlexanderFeijoo/fantasy-calendar.git
@@ -70,7 +81,7 @@ The FastAPI service will be available at [http://localhost:5001](http://localhos
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 Tests run inside the Docker container using Pytest:
 
@@ -88,7 +99,7 @@ pytest
 
 ---
 
-## 🧠 API: `/convert-date`
+## API: `/convert-date`
 
 POST `/convert-date` accepts either:
 
@@ -123,7 +134,7 @@ Returns:
 
 ---
 
-## 📅 Supported Calendar: Harptos
+## Supported Calendar: Harptos
 
 - 12 months of 30 days
 - Intercalary holidays: Midwinter, Greengrass, Midsummer, etc.
@@ -134,7 +145,7 @@ Leap year logic aligns with Gregorian via the calendar epoch.
 
 ---
 
-## 🧱 Architectural Notes
+## Architectural Notes
 
 - **Gregorian** is the canonical date format internally (used for DB storage)
 - All conversions happen relative to the **calendar schema epoch**
@@ -143,21 +154,23 @@ Leap year logic aligns with Gregorian via the calendar epoch.
 
 ---
 
-## 🛣️ Roadmap
+## Roadmap
 
 Planned features:
 
-- 🌐 Frontend UI (Next.js + Tailwind + Radix)
-- 👤 Auth + session support
-- 🪄 Full CRUD for events, notes, characters
-- 🔁 Repeat rules (e.g. lunar cycles, holidays)
-- 🌙 Multiple calendars per campaign
-- 📦 Host via AWS (FastAPI Lambda + RDS)
-- 📖 Admin interface for custom calendar definitions
+- Frontend UI (Next.js + Tailwind + Radix)
+- Auth + session support
+- Full CRUD for events, notes, characters
+- Repeat rules (e.g. lunar cycles, holidays)
+- Multiple calendars per campaign
+- Host via AWS (FastAPI Lambda + RDS)
+- Admin interface for custom calendar definitions
+
+## 
 
 ---
 
-## 💡 Dev Tips
+## Dev Tips
 
 - `.env` defines DB connection details for Prisma + Postgres
 - Prisma generates client code into `prisma/client` (included in Git)
@@ -166,7 +179,7 @@ Planned features:
 
 ---
 
-## 🧙 About the Project
+## About the Project
 
 This is a senior-level portfolio project intended to demonstrate:
 
