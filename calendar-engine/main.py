@@ -1,20 +1,22 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from enum import Enum
 from dateutil.parser import parse as date_parser
 
 from calendars.converter import convert_date
 from calendars.types import CustomCalendarDate
 
-app = FastAPI()
+class CalendarName(str, Enum):
+    harptos = "harptos"
 
+app = FastAPI()
 
 class ConvertDateRequest(BaseModel):
     gregorian: str | None = None
     year: int | None = None
     month: str | None = None
     day: int | None = None
-    calendar: str = "harptos"
-
+    calendar: CalendarName = CalendarName.harptos
 
 @app.get("/")
 def read_root():
@@ -25,10 +27,9 @@ def read_root():
 def convert_date_endpoint(req: ConvertDateRequest):
     if req.gregorian:
         try:
-            parsed_date = date_parser(req.gregorian).date()
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
-        result = convert_date(req.gregorian, req.calendar)
+         result = convert_date(req.gregorian, req.calendar)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
         return {"calendar_date": result.__dict__}
 
     if None not in (req.year, req.month, req.day):
