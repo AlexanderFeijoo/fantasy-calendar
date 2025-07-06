@@ -68,6 +68,9 @@ fantasy-calendar/
 git clone https://github.com/AlexanderFeijoo/fantasy-calendar.git
 cd fantasy-calendar
 
+# Generate the Prisma client (output will be created in `prisma/client`)
+npx prisma generate
+
 # Install Python dependencies locally (for editor linting)
 cd calendar-engine
 pip install -r requirements.txt
@@ -173,7 +176,7 @@ Planned features:
 ## Dev Tips
 
 - `.env` defines DB connection details for Prisma + Postgres
-- Prisma generates client code into `prisma/client` (included in Git)
+- Prisma generates client code into `prisma/client` (run `npx prisma generate` to create it)
 - Use `pip install -r requirements.txt` locally for editor linting
 - All new calendar systems should subclass `CalendarSchema` for clean integration
 
