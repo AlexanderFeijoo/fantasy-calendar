@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "openapi-typescript": "^7.8.0",
     "prisma": "^6.11.0"
   },
   "dependencies": {
@@ -10,7 +11,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+     "generate:types": "openapi-typescript http://localhost:5001/openapi.json --output shared/types/api.d.ts"
   },
   "repository": {
     "type": "git",

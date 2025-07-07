@@ -27,7 +27,7 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend:/app
-      - /app/node_modules  # Prevent host node_modules from overwriting
+      - /app/node_modules
     working_dir: /app
     command: npm run dev
 

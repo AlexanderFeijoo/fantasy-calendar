@@ -2,12 +2,30 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from enum import Enum
+from datetime import date
+from typing import Optional
 
 from calendars.converter import convert_date
 from calendars.types import CustomCalendarDate
 
 class CalendarName(str, Enum):
     harptos = "harptos"
+
+class CalendarDate(BaseModel):
+    year: int
+    month: str
+    day: int
+
+class ConvertDateRequest(BaseModel):
+    gregorian: Optional[str] = None
+    year: Optional[int] = None
+    month: Optional[str] = None
+    day: Optional[int] = None
+    calendar: CalendarName = CalendarName.harptos
+
+class ConvertDateResponse(BaseModel):
+    calendar_date: Optional[CalendarDate] = None
+    gregorian_date: Optional[date] = None
 
 app = FastAPI()
 
@@ -22,19 +40,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class ConvertDateRequest(BaseModel):
-    gregorian: str | None = None
-    year: int | None = None
-    month: str | None = None
-    day: int | None = None
-    calendar: CalendarName = CalendarName.harptos
-
 @app.get("/")
 def read_root():
     return {"status": "ok"}
 
-
-@app.post("/convert-date")
+@app.post("/convert-date", response_model=ConvertDateResponse)
 def convert_date_endpoint(req: ConvertDateRequest):
     if req.gregorian:
         try:
@@ -49,6 +59,6 @@ def convert_date_endpoint(req: ConvertDateRequest):
             g_date = convert_date(cc_date, req.calendar)
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
-        return {"gregorian_date": g_date.isoformat()}
+        return {"gregorian_date": g_date}
 
     raise HTTPException(status_code=400, detail="Provide either 'gregorian' or calendar fields")
