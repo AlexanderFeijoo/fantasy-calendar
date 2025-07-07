@@ -4,24 +4,13 @@ import * as Select from '@radix-ui/react-select'
 import { useState } from 'react'
 import { ChevronDownIcon } from '@radix-ui/react-icons'
 import type { paths } from '@shared/types/api'
+import { HARPTOS_MONTHS } from '../../../lib/calendars/harptos'
+import Link from 'next/link'
 
 type ConvertRequest = paths['/convert-date']['post']['requestBody']['content']['application/json']
 type ConvertResponse = paths['/convert-date']['post']['responses']['200']['content']['application/json']
 
-const HARPTOS_MONTHS = [
-  'Hammer',
-  'Alturiak',
-  'Ches',
-  'Tarsakh',
-  'Mirtul',
-  'Kythorn',
-  'Flamerule',
-  'Eleasis',
-  'Eleint',
-  'Marpenoth',
-  'Uktar',
-  'Nightal',
-] as const
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5001'
 
 export default function ConvertPage() {
   const [harptosInput, setHarptosInput] = useState<ConvertRequest>({
@@ -43,7 +32,7 @@ export default function ConvertPage() {
       calendar: 'harptos',
     }
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/convert-date`, {
+    const res = await fetch(`${API_URL}/convert-date`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -62,7 +51,7 @@ export default function ConvertPage() {
       day: null,
     }
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/convert-date`, {
+    const res = await fetch(`${API_URL}/convert-date`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -73,15 +62,16 @@ export default function ConvertPage() {
   }
 
   return (
-    <main className="max-w-xl mx-auto p-6 space-y-12">
-      <h1 className="text-3xl font-bold text-white text-center">Harptos ↔ Gregorian Converter</h1>
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] text-foreground bg-background">
+      <main className="flex flex-col gap-8 row-start-2 w-full max-w-xl">
+        <h1 className="text-3xl font-bold text-center">Harptos ↔ Gregorian Converter</h1>
 
       {/* Harptos → Gregorian */}
-      <section className="bg-gray-900 text-white border border-gray-700 rounded-lg p-6 space-y-4">
+      <section className="bg-background border border-foreground/20 rounded-lg p-6 space-y-4">
         <h2 className="text-xl font-semibold">Harptos → Gregorian</h2>
 
         <input
-          className="w-full bg-gray-800 p-2 rounded border border-gray-600 text-white placeholder-gray-400"
+          className="w-full bg-background p-2 rounded border border-foreground/20"
           type="number"
           placeholder="Year"
           value={harptosInput.year ?? ''}
@@ -96,16 +86,16 @@ export default function ConvertPage() {
             setHarptosInput({ ...harptosInput, month: value as ConvertRequest['month'] })
           }
         >
-          <Select.Trigger className="w-full bg-gray-800 p-2 rounded border border-gray-600 flex justify-between items-center text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <Select.Trigger className="w-full bg-background p-2 rounded border border-foreground/20 flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500">
             <Select.Value placeholder="Select Month" />
             <ChevronDownIcon />
           </Select.Trigger>
-          <Select.Content className="bg-gray-900 border border-gray-700 rounded shadow-lg text-white z-50">
+          <Select.Content className="bg-background border border-foreground/20 rounded shadow-lg z-50">
             {HARPTOS_MONTHS.map((month) => (
               <Select.Item
                 key={month}
                 value={month}
-                className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
+                className="px-4 py-2 hover:bg-foreground/10 cursor-pointer"
               >
                 <Select.ItemText>{month}</Select.ItemText>
               </Select.Item>
@@ -114,7 +104,7 @@ export default function ConvertPage() {
         </Select.Root>
 
         <input
-          className="w-full bg-gray-800 p-2 rounded border border-gray-600 text-white placeholder-gray-400"
+          className="w-full bg-background p-2 rounded border border-foreground/20"
           type="number"
           placeholder="Day"
           value={harptosInput.day ?? ''}
@@ -136,12 +126,12 @@ export default function ConvertPage() {
       </section>
 
       {/* Gregorian → Harptos */}
-      <section className="bg-gray-900 text-white border border-gray-700 rounded-lg p-6 space-y-4">
+      <section className="bg-background border border-foreground/20 rounded-lg p-6 space-y-4">
         <h2 className="text-xl font-semibold">Gregorian → Harptos</h2>
 
         <input
           type="date"
-          className="w-full bg-gray-800 p-2 rounded border border-gray-600 text-white"
+          className="w-full bg-background p-2 rounded border border-foreground/20"
           value={gregorianInput}
           onChange={(e) => setGregorianInput(e.target.value)}
         />
@@ -160,5 +150,11 @@ export default function ConvertPage() {
         )}
       </section>
     </main>
+    <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-sm text-foreground/60">
+      <Link className="hover:underline hover:underline-offset-4" href="/">
+        ← Home
+      </Link>
+    </footer>
+  </div>
   )
 }
