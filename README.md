@@ -182,16 +182,4 @@ Planned features:
 
 ---
 
-## About the Project
-
-This is a senior-level portfolio project intended to demonstrate:
-
-- Modular full-stack architecture
-- Custom date conversion engines
-- API design + validation
-- Infrastructure as code (Docker)
-- Clean separation of core logic and schemas
-
----
-
 © 2025 Alexander Feijoo — Built for DMs, worldbuilders, and nerds everywhere.
